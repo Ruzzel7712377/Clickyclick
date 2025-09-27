@@ -1,38 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clicking Simulator Deluxe</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #141e30, #243b55);
-      color: #fff;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clickyclick Deluxe Rebirth</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg,#141e30,#243b55);
+    color: #fff;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+  }
+  h1 {
+    font-size: 2.5rem;
+    margin: 20px 0 10px;
+    text-shadow: 2px 2px #00000050;
+  }
+  #gameContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  #counter {
+    font-size: 2rem;
+    margin: 20px 0;
+  }
+  button {
+    background: #00bcd4;
+    border: none;
+    color: #fff;
+    padding: 15px 40px;
+    font-size: 1.3rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+    margin: 5px;
+    box-shadow: 0 5px #0097a7;
+  }
+  button:hover { transform: scale(1.05); }
+  button:active { transform: scale(0.95); box-shadow: 0 2px #0097a7; }
+  #upgrade, #autoclick, #rebirth { background:#4caf50; box-shadow:0 5px #388e3c; }
+  #status { margin-top: 20px; font-size: 1.1rem; opacity: 0.9; min-height: 24px; }
+  #leaderboardContainer { margin-top: 40px; background: #222; padding: 20px; border-radius: 12px; max-width: 400px; margin-left:auto; margin-right:auto; }
+  #leaderboard h2 { margin: 0 0 10px; }
+  #leaderboardList { max-height: 200px; overflow-y: auto; text-align: left; }
+  #leaderboardList div { margin: 4px 0; }
+  input { padding: 8px; border-radius: 6px; border: none; margin-right: 10px; font-size: 1rem; }
+</style>
+</head>
+<body>
+<h1>Clickyclick Deluxe 🔥</h1>
+<div id="gameContainer">
+  <div id="counter">Clicks: 0</div>
+  <button id="clickBtn">Click! 🎯</button>
+  <div>
+    <button id="upgrade">Buy Upgrade 🔥 (Cost: 50)</button>
+    <button id="autoclick">Buy Auto-Clicker 🤖 (Cost: 100)</button>
+    <button id="rebirth">Rebirth 🔄 (Need: 1,000,000)</button>
+  </div>
+  <div id="status"></div>
+</div>
 
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
+<div id="leaderboardContainer">
+  <h2>🏆 Leaderboard</h2>
+  <div>
+    <input type="text" id="nicknameInput" placeholder="Your nickname"/>
+    <button id="saveScoreBtn">Save Score 💾</button>
+  </div>
+  <div id="leaderboardList"></div>
+</div>
 
-    #counter {
-      font-size: 2rem;
-      margin: 20px 0;
-    }
+<script>
+let clicks = parseInt(localStorage.getItem("clicks")) || 0;
+let clickPower = parseInt(localStorage.getItem("clickPower")) || 1;
+let autoClickers = parseInt(localStorage.getItem("autoClickers")) || 0;
+let upgradeCost = parseInt(localStorage.getItem("upgradeCost")) || 50;
+let autoClickCost = parseInt(localStorage.getItem("autoClickCost")) || 100;
+let rebirthPoints = parseInt(localStorage.getItem("rebirthPoints")) || 0;
+let totalClicks = parseInt(localStorage.getItem("totalClicks")) || 0;
+let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
 
-    button {
-      background: #00bcd4;
-      border: none;
-      color: #fff;
-      padding: 15px 40px;
-      font-size: 1.3rem;
+const counter = document.getElementById("counter");
+const clickBtn = document.getElementById("clickBtn");
+const upgradeBtn = document.getElementById("upgrade");
+const autoClickBtn = document.getElementById("autoclick");
+const rebirthBtn = document.getElementById("rebirth");
+const status = document.getElementById("status");
+const nicknameInput = document.getElementById("nicknameInput");
+const saveScoreBtn = document.getElementById("saveScoreBtn");
+const leaderboardList = document.getElementById("leaderboardList");
+
+function updateCounter(){
+  counter.textContent = `Clicks: ${clicks} ✨ (Power: ${clickPower} 🔥, Auto: ${autoClickers} 🤖, Rebirth: ${rebirthPoints} 🔄)`;
+  upgradeBtn.textContent = `Buy Upgrade 🔥 (Cost: ${upgradeCost})`;
+  autoClickBtn.textContent = `Buy Auto-Clicker 🤖 (Cost: ${autoClickCost})`;
+  rebirthBtn.textContent = `Rebirth 🔄 (Need: 1,000,000)`;
+  localStorage.setItem("clicks", clicks);
+  localStorage.setItem("clickPower", clickPower);
+  localStorage.setItem("autoClickers", autoClickers);
+  localStorage.setItem("upgradeCost", upgradeCost);
+  localStorage.setItem("autoClickCost", autoClickCost);
+  localStorage.setItem("rebirthPoints", rebirthPoints);
+  localStorage.setItem("totalClicks", totalClicks);
+  localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+}
+
+clickBtn.addEventListener("click", ()=>{
+  clicks += clickPower + rebirthPoints*5;
+  totalClicks += clickPower + rebirthPoints*5;
+  updateCounter();
+  clickBtn.style.transform="scale(1.2)";
+  setTimeout(()=>{clickBtn.style.transform="scale(1)";},100);
+});
+
+upgradeBtn.addEventListener("click", ()=>{
+  if(clicks >= upgradeCost){
+    clicks -= upgradeCost;
+    clickPower++;
+    upgradeCost = Math.floor(upgradeCost*1.5);
+    status.textContent = `Upgrade purchased! Click power: ${clickPower} 🔥`;
+  } else { status.textContent = "Not enough clicks! ⚠️"; }
+  updateCounter();
+});
+
+autoClickBtn.addEventListener("click", ()=>{
+  if(clicks >= autoClickCost){
+    clicks -= autoClickCost;
+    autoClickers++;
+    autoClickCost = Math.floor(autoClickCost*1.5);
+    status.textContent = `Auto-clicker purchased! You now have ${autoClickers} 🤖`;
+  } else { status.textContent = "Not enough clicks! ⚠️"; }
+  updateCounter();
+});
+
+rebirthBtn.addEventListener("click", ()=>{
+  if(totalClicks >= 1000000){
+    rebirthPoints++;
+    clicks = 0;
+    clickPower = 1;
+    autoClickers = 0;
+    upgradeCost = 50;
+    autoClickCost = 100;
+    totalClicks = 0;
+    status.textContent = `Rebirth successful! Rebirth points: ${rebirthPoints} 🔄`;
+  } else { status.textContent = "You need 1,000,000 total clicks! ⚠️"; }
+  updateCounter();
+});
+
+setInterval(()=>{
+  if(autoClickers>0){
+    clicks += autoClickers*(clickPower + rebirthPoints*5);
+    totalClicks += autoClickers*(clickPower + rebirthPoints*5);
+    updateCounter();
+  }
+},1000);
+
+// Leaderboard
+function updateLeaderboard(){
+  leaderboardList.innerHTML="";
+  leaderboard.sort((a,b)=>b.score-a.score);
+  leaderboard.forEach(entry=>{
+    leaderboardList.innerHTML += `<div>⭐ ${entry.name}: ${entry.score}</div>`;
+  });
+}
+
+saveScoreBtn.addEventListener("click", ()=>{
+  const name = nicknameInput.value.trim() || "Anonymous";
+  leaderboard.push({name: name, score: totalClicks + clicks});
+  nicknameInput.value="";
+  updateLeaderboard();
+  updateCounter();
+});
+
+updateCounter();
+updateLeaderboard();
+</script>
+</body>
+</html>      font-size: 1.3rem;
       border-radius: 10px;
       cursor: pointer;
       transition: 0.2s;
@@ -135,3 +283,4 @@
   </script>
 </body>
 </html>
+
