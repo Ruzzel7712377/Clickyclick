@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clicking Simulator</title>
+  <title>Clicking Simulator Deluxe</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: linear-gradient(135deg, #141e30, #243b55);
       color: #fff;
       text-align: center;
-      height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      min-height: 100vh;
     }
 
     h1 {
@@ -36,6 +36,7 @@
       border-radius: 10px;
       cursor: pointer;
       transition: 0.2s;
+      margin: 5px;
     }
 
     button:hover {
@@ -43,12 +44,11 @@
       transform: scale(1.05);
     }
 
-    #upgrade {
-      margin-top: 20px;
+    #upgrade, #autoclick {
       background: #4caf50;
     }
 
-    #upgrade:hover {
+    #upgrade:hover, #autoclick:hover {
       background: #388e3c;
     }
 
@@ -60,37 +60,78 @@
   </style>
 </head>
 <body>
-  <h1>Clicking Simulator</h1>
+  <h1>Clicking Simulator Deluxe</h1>
   <div id="counter">Clicks: 0</div>
   <button id="clickBtn">Click!</button>
-  <button id="upgrade">Buy Upgrade (Cost: 50)</button>
+  <div>
+    <button id="upgrade">Buy Upgrade (Cost: 50)</button>
+    <button id="autoclick">Buy Auto-Clicker (Cost: 100)</button>
+  </div>
   <div id="status"></div>
 
   <script>
-    let clicks = 0;
-    let clickPower = 1;
+    // Load saved state
+    let clicks = parseInt(localStorage.getItem("clicks")) || 0;
+    let clickPower = parseInt(localStorage.getItem("clickPower")) || 1;
+    let autoClickers = parseInt(localStorage.getItem("autoClickers")) || 0;
     const counter = document.getElementById("counter");
     const clickBtn = document.getElementById("clickBtn");
     const upgradeBtn = document.getElementById("upgrade");
+    const autoClickBtn = document.getElementById("autoclick");
     const status = document.getElementById("status");
+
+    function updateCounter() {
+      counter.textContent = `Clicks: ${clicks}`;
+      localStorage.setItem("clicks", clicks);
+      localStorage.setItem("clickPower", clickPower);
+      localStorage.setItem("autoClickers", autoClickers);
+    }
 
     clickBtn.addEventListener("click", () => {
       clicks += clickPower;
-      counter.textContent = `Clicks: ${clicks}`;
+      updateCounter();
+      animateClick();
     });
 
     upgradeBtn.addEventListener("click", () => {
       if (clicks >= 50) {
         clicks -= 50;
         clickPower++;
-        status.textContent = `Upgrade purchased! Click power is now ${clickPower}.`;
+        status.textContent = `Upgrade purchased! Click power: ${clickPower}`;
       } else {
-        status.textContent = "Not enough clicks! Keep tapping like your life depends on it.";
+        status.textContent = "Not enough clicks!";
       }
-      counter.textContent = `Clicks: ${clicks}`;
+      updateCounter();
     });
+
+    autoClickBtn.addEventListener("click", () => {
+      if (clicks >= 100) {
+        clicks -= 100;
+        autoClickers++;
+        status.textContent = `Auto-clicker purchased! You now have ${autoClickers}`;
+      } else {
+        status.textContent = "Not enough clicks!";
+      }
+      updateCounter();
+    });
+
+    // Auto-click every second
+    setInterval(() => {
+      if (autoClickers > 0) {
+        clicks += autoClickers * clickPower;
+        updateCounter();
+      }
+    }, 1000);
+
+    // Simple click animation
+    function animateClick() {
+      clickBtn.style.transform = "scale(1.2)";
+      setTimeout(() => {
+        clickBtn.style.transform = "scale(1)";
+      }, 100);
+    }
+
+    updateCounter();
   </script>
 </body>
-
 </html>
-
