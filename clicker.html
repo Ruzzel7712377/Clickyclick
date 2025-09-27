@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clicking Simulator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #141e30, #243b55);
+      color: #fff;
+      text-align: center;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    #counter {
+      font-size: 2rem;
+      margin: 20px 0;
+    }
+
+    button {
+      background: #00bcd4;
+      border: none;
+      color: #fff;
+      padding: 15px 40px;
+      font-size: 1.3rem;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    button:hover {
+      background: #0097a7;
+      transform: scale(1.05);
+    }
+
+    #upgrade {
+      margin-top: 20px;
+      background: #4caf50;
+    }
+
+    #upgrade:hover {
+      background: #388e3c;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <h1>Clicking Simulator</h1>
+  <div id="counter">Clicks: 0</div>
+  <button id="clickBtn">Click!</button>
+  <button id="upgrade">Buy Upgrade (Cost: 50)</button>
+  <div id="status"></div>
+
+  <script>
+    let clicks = 0;
+    let clickPower = 1;
+    const counter = document.getElementById("counter");
+    const clickBtn = document.getElementById("clickBtn");
+    const upgradeBtn = document.getElementById("upgrade");
+    const status = document.getElementById("status");
+
+    clickBtn.addEventListener("click", () => {
+      clicks += clickPower;
+      counter.textContent = `Clicks: ${clicks}`;
+    });
+
+    upgradeBtn.addEventListener("click", () => {
+      if (clicks >= 50) {
+        clicks -= 50;
+        clickPower++;
+        status.textContent = `Upgrade purchased! Click power is now ${clickPower}.`;
+      } else {
+        status.textContent = "Not enough clicks! Keep tapping like your life depends on it.";
+      }
+      counter.textContent = `Clicks: ${clicks}`;
+    });
+  </script>
+</body>
+</html>
