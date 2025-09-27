@@ -1,55 +1,33 @@
-<!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Clickyclick Deluxe Rebirth</title>
+<title>Clickyclick Deluxe Weekly Rebirth</title>
 <style>
   body {
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg,#141e30,#243b55);
     color: #fff;
     text-align: center;
-    margin: 0;
-    padding: 0;
+    margin:0; padding:0;
   }
-  h1 {
-    font-size: 2.5rem;
-    margin: 20px 0 10px;
-    text-shadow: 2px 2px #00000050;
-  }
-  #gameContainer {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-  }
-  #counter {
-    font-size: 2rem;
-    margin: 20px 0;
-  }
+  h1 { font-size:2.5rem; margin:20px 0 10px; text-shadow:2px 2px #00000050; }
+  #gameContainer { display:flex; flex-direction:column; justify-content:center; align-items:center; padding:20px; }
+  #counter { font-size:2rem; margin:20px 0; }
   button {
-    background: #00bcd4;
-    border: none;
-    color: #fff;
-    padding: 15px 40px;
-    font-size: 1.3rem;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: 0.2s;
-    margin: 5px;
-    box-shadow: 0 5px #0097a7;
+    background:#00bcd4; border:none; color:#fff; padding:15px 40px; font-size:1.3rem;
+    border-radius:12px; cursor:pointer; transition:0.2s; margin:5px; box-shadow:0 5px #0097a7;
   }
-  button:hover { transform: scale(1.05); }
-  button:active { transform: scale(0.95); box-shadow: 0 2px #0097a7; }
+  button:hover { transform:scale(1.05); }
+  button:active { transform:scale(0.95); box-shadow:0 2px #0097a7; }
   #upgrade, #autoclick, #rebirth { background:#4caf50; box-shadow:0 5px #388e3c; }
-  #status { margin-top: 20px; font-size: 1.1rem; opacity: 0.9; min-height: 24px; }
-  #leaderboardContainer { margin-top: 40px; background: #222; padding: 20px; border-radius: 12px; max-width: 400px; margin-left:auto; margin-right:auto; }
-  #leaderboard h2 { margin: 0 0 10px; }
-  #leaderboardList { max-height: 200px; overflow-y: auto; text-align: left; }
-  #leaderboardList div { margin: 4px 0; }
-  input { padding: 8px; border-radius: 6px; border: none; margin-right: 10px; font-size: 1rem; }
+  #status { margin-top:20px; font-size:1.1rem; opacity:0.9; min-height:24px; }
+  #leaderboardContainer { margin-top:40px; background:#222; padding:20px; border-radius:12px; max-width:400px; margin-left:auto; margin-right:auto; }
+  #leaderboard h2 { margin:0 0 10px; }
+  #leaderboardList { max-height:200px; overflow-y:auto; text-align:left; }
+  #leaderboardList div { margin:4px 0; }
+  input { padding:8px; border-radius:6px; border:none; margin-right:10px; font-size:1rem; }
 </style>
 </head>
 <body>
@@ -66,10 +44,10 @@
 </div>
 
 <div id="leaderboardContainer">
-  <h2>🏆 Leaderboard</h2>
+  <h2>🏆 Weekly Rebirth Leaderboard</h2>
   <div>
     <input type="text" id="nicknameInput" placeholder="Your nickname"/>
-    <button id="saveScoreBtn">Save Score 💾</button>
+    <button id="saveScoreBtn">Save Rebirth 💾</button>
   </div>
   <div id="leaderboardList"></div>
 </div>
@@ -83,6 +61,7 @@ let autoClickCost = parseInt(localStorage.getItem("autoClickCost")) || 100;
 let rebirthPoints = parseInt(localStorage.getItem("rebirthPoints")) || 0;
 let totalClicks = parseInt(localStorage.getItem("totalClicks")) || 0;
 let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+let lastReset = localStorage.getItem("lastReset") || new Date().toISOString();
 
 const counter = document.getElementById("counter");
 const clickBtn = document.getElementById("clickBtn");
@@ -94,8 +73,22 @@ const nicknameInput = document.getElementById("nicknameInput");
 const saveScoreBtn = document.getElementById("saveScoreBtn");
 const leaderboardList = document.getElementById("leaderboardList");
 
+// Weekly reset
+function checkWeeklyReset(){
+  const now = new Date();
+  const last = new Date(lastReset);
+  const oneWeek = 1000*60*60*24*7;
+  if(now - last >= oneWeek){
+    leaderboard = [];
+    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+    lastReset = now.toISOString();
+    localStorage.setItem("lastReset", lastReset);
+  }
+}
+
+// Update display
 function updateCounter(){
-  counter.textContent = `Clicks: ${clicks} ✨ (Power: ${clickPower} 🔥, Auto: ${autoClickers} 🤖, Rebirth: ${rebirthPoints} 🔄)`;
+  counter.textContent = `Clicks: ${clicks} ✨ (Power: ${clickPower} 🔥, Auto: ${autoClickers} 🤖, Rebirths: ${rebirthPoints} 🔄)`;
   upgradeBtn.textContent = `Buy Upgrade 🔥 (Cost: ${upgradeCost})`;
   autoClickBtn.textContent = `Buy Auto-Clicker 🤖 (Cost: ${autoClickCost})`;
   rebirthBtn.textContent = `Rebirth 🔄 (Need: 1,000,000)`;
@@ -106,37 +99,40 @@ function updateCounter(){
   localStorage.setItem("autoClickCost", autoClickCost);
   localStorage.setItem("rebirthPoints", rebirthPoints);
   localStorage.setItem("totalClicks", totalClicks);
-  localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
 }
 
+// Click button
 clickBtn.addEventListener("click", ()=>{
-  clicks += clickPower + rebirthPoints*5;
-  totalClicks += clickPower + rebirthPoints*5;
+  clicks += clickPower;
+  totalClicks += clickPower;
   updateCounter();
   clickBtn.style.transform="scale(1.2)";
   setTimeout(()=>{clickBtn.style.transform="scale(1)";},100);
 });
 
+// Buy upgrade
 upgradeBtn.addEventListener("click", ()=>{
   if(clicks >= upgradeCost){
     clicks -= upgradeCost;
     clickPower++;
     upgradeCost = Math.floor(upgradeCost*1.5);
-    status.textContent = `Upgrade purchased! Click power: ${clickPower} 🔥`;
-  } else { status.textContent = "Not enough clicks! ⚠️"; }
+    status.textContent=`Upgrade purchased! Click power: ${clickPower} 🔥`;
+  } else { status.textContent="Not enough clicks! ⚠️"; }
   updateCounter();
 });
 
+// Buy auto-clicker
 autoClickBtn.addEventListener("click", ()=>{
   if(clicks >= autoClickCost){
     clicks -= autoClickCost;
     autoClickers++;
     autoClickCost = Math.floor(autoClickCost*1.5);
-    status.textContent = `Auto-clicker purchased! You now have ${autoClickers} 🤖`;
-  } else { status.textContent = "Not enough clicks! ⚠️"; }
+    status.textContent=`Auto-clicker purchased! You now have ${autoClickers} 🤖`;
+  } else { status.textContent="Not enough clicks! ⚠️"; }
   updateCounter();
 });
 
+// Rebirth
 rebirthBtn.addEventListener("click", ()=>{
   if(totalClicks >= 1000000){
     rebirthPoints++;
@@ -146,141 +142,42 @@ rebirthBtn.addEventListener("click", ()=>{
     upgradeCost = 50;
     autoClickCost = 100;
     totalClicks = 0;
-    status.textContent = `Rebirth successful! Rebirth points: ${rebirthPoints} 🔄`;
-  } else { status.textContent = "You need 1,000,000 total clicks! ⚠️"; }
+    status.textContent=`Rebirth successful! Rebirths: ${rebirthPoints} 🔄`;
+    updateLeaderboard();
+  } else { status.textContent="Need 1,000,000 total clicks! ⚠️"; }
   updateCounter();
 });
 
+// Auto-click
 setInterval(()=>{
   if(autoClickers>0){
-    clicks += autoClickers*(clickPower + rebirthPoints*5);
-    totalClicks += autoClickers*(clickPower + rebirthPoints*5);
+    clicks += autoClickers*clickPower;
+    totalClicks += autoClickers*clickPower;
     updateCounter();
   }
 },1000);
 
 // Leaderboard
 function updateLeaderboard(){
+  checkWeeklyReset();
+  leaderboard.sort((a,b)=>b.rebirths - a.rebirths);
   leaderboardList.innerHTML="";
-  leaderboard.sort((a,b)=>b.score-a.score);
   leaderboard.forEach(entry=>{
-    leaderboardList.innerHTML += `<div>⭐ ${entry.name}: ${entry.score}</div>`;
+    leaderboardList.innerHTML += `<div>⭐ ${entry.name}: ${entry.rebirths} 🔄</div>`;
   });
 }
 
 saveScoreBtn.addEventListener("click", ()=>{
   const name = nicknameInput.value.trim() || "Anonymous";
-  leaderboard.push({name: name, score: totalClicks + clicks});
+  // Remove previous entry with same name
+  leaderboard = leaderboard.filter(e=>e.name !== name);
+  leaderboard.push({name: name, rebirths: rebirthPoints});
   nicknameInput.value="";
   updateLeaderboard();
-  updateCounter();
 });
 
 updateCounter();
 updateLeaderboard();
 </script>
 </body>
-</html>      font-size: 1.3rem;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.2s;
-      margin: 5px;
-    }
-
-    button:hover {
-      background: #0097a7;
-      transform: scale(1.05);
-    }
-
-    #upgrade, #autoclick {
-      background: #4caf50;
-    }
-
-    #upgrade:hover, #autoclick:hover {
-      background: #388e3c;
-    }
-
-    #status {
-      margin-top: 20px;
-      font-size: 1.1rem;
-      opacity: 0.9;
-    }
-  </style>
-</head>
-<body>
-  <h1>Clicking Simulator Deluxe</h1>
-  <div id="counter">Clicks: 0</div>
-  <button id="clickBtn">Click!</button>
-  <div>
-    <button id="upgrade">Buy Upgrade (Cost: 50)</button>
-    <button id="autoclick">Buy Auto-Clicker (Cost: 100)</button>
-  </div>
-  <div id="status"></div>
-
-  <script>
-    // Load saved state
-    let clicks = parseInt(localStorage.getItem("clicks")) || 0;
-    let clickPower = parseInt(localStorage.getItem("clickPower")) || 1;
-    let autoClickers = parseInt(localStorage.getItem("autoClickers")) || 0;
-    const counter = document.getElementById("counter");
-    const clickBtn = document.getElementById("clickBtn");
-    const upgradeBtn = document.getElementById("upgrade");
-    const autoClickBtn = document.getElementById("autoclick");
-    const status = document.getElementById("status");
-
-    function updateCounter() {
-      counter.textContent = `Clicks: ${clicks}`;
-      localStorage.setItem("clicks", clicks);
-      localStorage.setItem("clickPower", clickPower);
-      localStorage.setItem("autoClickers", autoClickers);
-    }
-
-    clickBtn.addEventListener("click", () => {
-      clicks += clickPower;
-      updateCounter();
-      animateClick();
-    });
-
-    upgradeBtn.addEventListener("click", () => {
-      if (clicks >= 50) {
-        clicks -= 50;
-        clickPower++;
-        status.textContent = `Upgrade purchased! Click power: ${clickPower}`;
-      } else {
-        status.textContent = "Not enough clicks!";
-      }
-      updateCounter();
-    });
-
-    autoClickBtn.addEventListener("click", () => {
-      if (clicks >= 100) {
-        clicks -= 100;
-        autoClickers++;
-        status.textContent = `Auto-clicker purchased! You now have ${autoClickers}`;
-      } else {
-        status.textContent = "Not enough clicks!";
-      }
-      updateCounter();
-    });
-
-    // Auto-click every second
-    setInterval(() => {
-      if (autoClickers > 0) {
-        clicks += autoClickers * clickPower;
-        updateCounter();
-      }
-    }, 1000);
-
-    // Simple click animation
-    function animateClick() {
-      clickBtn.style.transform = "scale(1.2)";
-      setTimeout(() => {
-        clickBtn.style.transform = "scale(1)";
-      }, 100);
-    }
-
-    updateCounter();
-  </script>
-</body>
 </html>
-
